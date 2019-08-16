@@ -13,15 +13,15 @@ echo ML_DIR is $ML_DIR
 ############################################################################
 if [ ! -d $ML_DIR/caffe-master/ ]; then
 
-# Uncompress all the ```*.tar.gz``` files in the repository, 
-    tar -xvf caffe-master.tar.gz 
+# Uncompress all the ```*.tar.gz``` files in the repository,
+    tar -xvf caffe-master.tar.gz
     tar -xvf darknet_origin.tar.gz
-    #split yolov3_deploy.tar.gz yolov3.tar.gz.parta -b 24MB    
+    #split yolov3_deploy.tar.gz yolov3.tar.gz.parta -b 24MB
     cat yolov3_deploy.tar.gz.partaa* > yolov3_deploy.tar.gz
     tar -xvf yolov3_deploy.tar.gz
     rm yolov3_deploy.tar.gz.*
     cd example_yolov3/5_file_for_test/
-    tar -xvf calib_data.tar 
+    tar -xvf calib_data.tar
     cd ../../
 
 # Run the following commands from the working directory:
@@ -29,7 +29,7 @@ if [ ! -d $ML_DIR/caffe-master/ ]; then
     find . -type f -name "*.data"  -print0 | xargs -0 dos2unix
     find . -type f -name "*.cfg"   -print0 | xargs -0 dos2unix
     find . -type f -name "*.names" -print0 | xargs -0 dos2unix
- 
+
 # Set the path in the coco.data.relative  file, placed in the example_yolov3/5_file_for_test/ folder
 # Set the test images path in the image.txt.relative file, placed in the example_yolov3/5_file_for_test/) folder
 
@@ -43,7 +43,7 @@ fi
 
 
 ############################################################################
-# Section 2.0: Darknet and Caffe 
+# Section 2.0: Darknet and Caffe
 ############################################################################
 
 cd darknet_origin/
@@ -65,25 +65,28 @@ export PYTHONPATH=$CAFFE_ROOT/distribute/python:/usr/local/lib/python2.7/dist-pa
 
 #check the environment
 python -c "import caffe; print caffe.__file__"
-
+cd ..
 
 ############################################################################
-# Section 3.0 
+# Section 3.0
 ############################################################################
 cd example_yolov3/
 rm results/*
 rm 5_file_for_test/yolov3_*_result.txt
 
 # step 0: Darknet to Caffe conversion
-bash -v 0_convert.sh 
+bash -v 0_convert.sh
 # step 1: test Darknet and Caffe YOLOv3 models
 bash -v 0_test_darknet.sh
 bash -v 1_test_caffe.sh
 # step 2: quantize YOLOv3 Caffe model
 cp 1_model_caffe/v3.caffemodel  ./2_model_for_quantize/
-bash -v 2_quantize.sh 
+cp 1_model_caffe/v3.prototxt 2_model_for_quantize/v3.prototxt
+python 1.5_proto_patch.py 2_model_for_quantize/v3.prototxt 416 416 5_file_for_test/calib.txt 5_file_for_test/calib/
+bash -v 2_quantize.sh
 # step 3: compile ELF file
-cp 3_model_after_quantize/ref_deploy.prototxt 3_model_after_quantize/deploy.prototxt
+# cp 3_model_after_quantize/ref_deploy.prototxt 3_model_after_quantize/deploy.prototxt
+python 2.5_proto_patch.py 3_model_after_quantize/deploy.prototxt
 bash -v 3_compile.sh
 # step 4: prepare the package for the ZCU102 board
 cd ..

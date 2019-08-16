@@ -1,0 +1,4 @@
+classes = 2
+valid = /home/lp6m/Desktop/Edge-AI-Platform-Tutorials/docs/Darknet-Caffe-Conversion/example_yolov3/5_file_for_test/image.txt
+names = /home/lp6m/Desktop/Edge-AI-Platform-Tutorials/docs/Darknet-Caffe-Conversion/example_yolov3/5_file_for_test/obj.names
+
